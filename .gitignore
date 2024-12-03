@@ -4,4 +4,4 @@
 tmp/
 *.rkt~
 */compiled/*
-.direnv/*
+.direnv
