@@ -3,6 +3,9 @@
 (require rackunit
          threading)
 
+(provide (rename-out [file->number-of-safe-reports part1])
+         (rename-out [file->number-of-adjusted-safe-reports part2]))
+
 ;; part one
 (define (file->number-of-safe-reports file-name)
   (~> file-name
@@ -65,3 +68,32 @@
 
 (check-equal? (file->number-of-safe-reports "short-example-list.txt") 2)
 ;(file->number-of-safe-reports "input.txt"); 246
+
+;; part two
+(define (file->number-of-adjusted-safe-reports file-name)
+  (~> file-name
+      (file->lines #:mode 'text)
+      lines->reports
+      reports->valid-or-dampened
+      length))
+
+(define (reports->valid-or-dampened reports)
+   (let-values ([(already-safe potentially-safe) (partition valid-report reports)])
+     (append already-safe
+             (filter dampener potentially-safe))))
+
+(define (dampener report)
+    (let ([report-length (length report)])
+      (letrec ([dampen (lambda (index-to-ignore)
+                         (cond [(>= index-to-ignore report-length) #f]
+                               [else (let ([dampened (append (take report index-to-ignore)
+                                                             (drop report (add1 index-to-ignore)))])
+                                       (or (valid-report dampened)
+                                           (dampen (add1 index-to-ignore))))]))])
+        (dampen 0))))
+
+(check-equal? (dampener '(1 3 2 4 5)) #t)
+(check-equal? (dampener '(1 2 7 8 9)) #f)
+
+(check-equal? (file->number-of-adjusted-safe-reports "short-example-list.txt") 4)
+;(file->number-of-adjusted-safe-reports "input.txt"); 318
