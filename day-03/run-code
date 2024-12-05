@@ -1,0 +1,17 @@
+#! /usr/bin/env racket
+#lang racket
+
+(require "code.rkt")
+
+(define args (current-command-line-arguments))
+
+(define file-name
+  (cond [(vector-empty? args)
+         "input.txt"]
+        [else
+         (vector-ref args 0)]))
+
+(fprintf (current-output-port)
+         "Part 1 returned: ~a\nPart 2 returned: ~a"
+         (part1 file-name)
+         (part2 file-name))
